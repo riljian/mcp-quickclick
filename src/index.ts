@@ -29,20 +29,20 @@ server.tool("get-settings", "取得快一點平台上的設定", async () => {
   };
 });
 
-server.tool("list-closed-dates", "列出快一點平台上的額外休息時間", async () => {
-  const openingSpecial = await quickClickConsole.listClosedDates();
+server.tool("list-day-offs", "列出快一點平台上的額外休息時間", async () => {
+  const dayOffs = await quickClickConsole.listDayOffs();
   return {
     content: [
       {
         type: "text",
-        text: JSON.stringify(openingSpecial),
+        text: JSON.stringify(dayOffs),
       },
     ],
   };
 });
 
 server.tool(
-  "add-closed-date",
+  "add-day-off",
   "新增快一點平台上的額外休息時間",
   {
     date: z
@@ -51,12 +51,12 @@ server.tool(
       .describe("The date to add the opening special for in YYYY-MM-DD format"),
   },
   async ({ date }) => {
-    await quickClickConsole.addClosedDate(date);
+    await quickClickConsole.addDayOff(date);
     return {
       content: [
         {
           type: "text",
-          text: `Added closed date for ${date}`,
+          text: `Added day off for ${date}`,
         },
       ],
     };
@@ -64,18 +64,18 @@ server.tool(
 );
 
 server.tool(
-  "delete-closed-date",
+  "delete-day-off",
   "刪除快一點平台上的額外休息時間",
   {
     id: z.number(),
   },
   async ({ id }) => {
-    await quickClickConsole.deleteClosedDate(id);
+    await quickClickConsole.deleteDayOff(id);
     return {
       content: [
         {
           type: "text",
-          text: `Deleted closed date for ${id}`,
+          text: `Deleted day off for ${id}`,
         },
       ],
     };

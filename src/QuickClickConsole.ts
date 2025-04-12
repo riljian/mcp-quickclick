@@ -29,7 +29,7 @@ export default class QuickClickConsole {
     return response.data[0];
   }
 
-  async addClosedDate(date: string) {
+  async addDayOff(date: string) {
     await this.api.post(
       `/eaa/shops/${this.configs.accountId}/opening-special`,
       { date, closeDay: 100 },
@@ -37,14 +37,14 @@ export default class QuickClickConsole {
     );
   }
 
-  async deleteClosedDate(id: number) {
+  async deleteDayOff(id: number) {
     await this.api.delete(
       `/eaa/shops/${this.configs.accountId}/opening-special/${id}`,
       { headers: { Cookie: await this.getCookie() } }
     );
   }
 
-  async listClosedDates() {
+  async listDayOffs() {
     const response = await this.api.get<{ name: string }[]>(
       `/eaa/shops/${this.configs.accountId}/opening-special`,
       {
