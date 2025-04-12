@@ -17,7 +17,7 @@ const quickClickConsole = new QuickClickConsole({
   accountId: config.accountId,
 });
 
-server.tool("get-settings", "Get settings", async () => {
+server.tool("get-settings", "取得快一點平台上的設定", async () => {
   const settings = await quickClickConsole.getSettings();
   return {
     content: [
@@ -29,21 +29,25 @@ server.tool("get-settings", "Get settings", async () => {
   };
 });
 
-server.tool("list-opening-special", "List opening special", async () => {
-  const openingSpecial = await quickClickConsole.listOpeningSpecial();
-  return {
-    content: [
-      {
-        type: "text",
-        text: JSON.stringify(openingSpecial),
-      },
-    ],
-  };
-});
+server.tool(
+  "list-opening-special",
+  "列出快一點平台上的額外休息時間",
+  async () => {
+    const openingSpecial = await quickClickConsole.listOpeningSpecial();
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(openingSpecial),
+        },
+      ],
+    };
+  }
+);
 
 server.tool(
   "add-opening-special",
-  "Add opening special",
+  "新增快一點平台上的額外休息時間",
   {
     date: z
       .string()
@@ -65,7 +69,7 @@ server.tool(
 
 server.tool(
   "delete-opening-special",
-  "Delete opening special",
+  "刪除快一點平台上的額外休息時間",
   {
     id: z.number(),
   },
@@ -84,7 +88,7 @@ server.tool(
 
 server.tool(
   "enable-ordering",
-  "Enable ordering",
+  "啟用快一點平台上的點餐功能",
   {
     enabled: z.boolean(),
   },
