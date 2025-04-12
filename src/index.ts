@@ -2,15 +2,15 @@ import express, { Request, Response } from "express";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 
+import config from "./config";
+
+const app = express();
 const server = new McpServer({
   name: "mcp-quickclick",
   version: "1.0.0",
 });
 
 // ... set up server resources, tools, and prompts ...
-
-const app = express();
-const port = process.env.PORT || 3000;
 
 // to support multiple simultaneous connections we have a lookup object from
 // sessionId to transport
@@ -35,6 +35,6 @@ app.post("/messages", async (req: Request, res: Response) => {
   }
 });
 
-app.listen(port);
-
-console.log(`Server is running on port ${port}`);
+app.listen(config.port, () => {
+  console.log(`Server is running on port ${config.port}`);
+});
