@@ -1,0 +1,38 @@
+name: Build and Deploy on Merge
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker registry
+        run: echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin
+
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.REGISTRY_USERNAME }}/mcp-quickclick:${{ github.sha }} .
+
+      - name: Push Docker image
+        run: docker push ${{ secrets.REGISTRY_USERNAME }}/mcp-quickclick:${{ github.sha }}
+
+  # deploy:
+  #   needs: build-and-push
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #     - name: Set up Kubeconfig
+  #       run: |
+  #         mkdir -p $HOME/.kube
+  #         echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
+  #         chmod 600 $HOME/.kube/config
+
+  #     - name: Set image in deployment and apply
+  #       run: |
+  #         kubectl set image deployment/mcp-quickclick mcp-quickclick=${{ secrets.REGISTRY_USERNAME }}/mcp-quickclick:${{ github.sha }}
