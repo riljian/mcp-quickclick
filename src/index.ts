@@ -17,21 +17,74 @@ const quickClickConsole = new QuickClickConsole({
   accountId: config.accountId,
 });
 
-server.resource("settings", "quickclick://settings", async (uri) => {
+server.tool("get-settings", "Get settings", async () => {
   const settings = await quickClickConsole.getSettings();
   return {
-    contents: [
+    content: [
       {
-        uri: uri.href,
-        mimeType: "application/json",
+        type: "text",
         text: JSON.stringify(settings),
       },
     ],
   };
 });
 
+server.tool("list-opening-special", "List opening special", async () => {
+  const openingSpecial = await quickClickConsole.listOpeningSpecial();
+  return {
+    content: [
+      {
+        type: "text",
+        text: JSON.stringify(openingSpecial),
+      },
+    ],
+  };
+});
+
+server.tool(
+  "add-opening-special",
+  "Add opening special",
+  {
+    date: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/)
+      .describe("The date to add the opening special for in YYYY-MM-DD format"),
+  },
+  async ({ date }) => {
+    await quickClickConsole.addOpeningSpecial(date);
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Added opening special for ${date}`,
+        },
+      ],
+    };
+  }
+);
+
+server.tool(
+  "delete-opening-special",
+  "Delete opening special",
+  {
+    id: z.number(),
+  },
+  async ({ id }) => {
+    await quickClickConsole.deleteOpeningSpecial(id);
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Deleted opening special for ${id}`,
+        },
+      ],
+    };
+  }
+);
+
 server.tool(
   "enable-ordering",
+  "Enable ordering",
   {
     enabled: z.boolean(),
   },

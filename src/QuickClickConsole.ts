@@ -29,6 +29,31 @@ export default class QuickClickConsole {
     return response.data[0];
   }
 
+  async addOpeningSpecial(date: string) {
+    await this.api.post(
+      `/eaa/shops/${this.configs.accountId}/opening-special`,
+      { date, closeDay: 100 },
+      { headers: { Cookie: await this.getCookie() } }
+    );
+  }
+
+  async deleteOpeningSpecial(id: number) {
+    await this.api.delete(
+      `/eaa/shops/${this.configs.accountId}/opening-special/${id}`,
+      { headers: { Cookie: await this.getCookie() } }
+    );
+  }
+
+  async listOpeningSpecial() {
+    const response = await this.api.get<{ name: string }[]>(
+      `/eaa/shops/${this.configs.accountId}/opening-special`,
+      {
+        headers: { Cookie: await this.getCookie() },
+      }
+    );
+    return response.data;
+  }
+
   async enableOrdering(enabled: boolean) {
     await this.api.put(
       `/eaa/console/${this.configs.accountId}/accounts`,
