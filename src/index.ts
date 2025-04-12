@@ -1,7 +1,9 @@
 import express, { Request, Response } from "express";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
+import { z } from "zod";
 
+import QuickClickConsole from "./QuickClickConsole";
 import config from "./config";
 
 const app = express();
@@ -9,8 +11,42 @@ const server = new McpServer({
   name: "mcp-quickclick",
   version: "1.0.0",
 });
+const quickClickConsole = new QuickClickConsole({
+  username: config.username,
+  password: config.password,
+  accountId: config.accountId,
+});
 
-// ... set up server resources, tools, and prompts ...
+server.resource("settings", "quickclick://settings", async (uri) => {
+  const settings = await quickClickConsole.getSettings();
+  return {
+    contents: [
+      {
+        uri: uri.href,
+        mimeType: "application/json",
+        text: JSON.stringify(settings),
+      },
+    ],
+  };
+});
+
+server.tool(
+  "enable-ordering",
+  {
+    enabled: z.boolean(),
+  },
+  async ({ enabled }) => {
+    await quickClickConsole.enableOrdering(enabled);
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Ordering ${enabled ? "enabled" : "disabled"}`,
+        },
+      ],
+    };
+  }
+);
 
 // to support multiple simultaneous connections we have a lookup object from
 // sessionId to transport

@@ -20,16 +20,27 @@ export default class QuickClickConsole {
   ) {}
 
   async getSettings() {
-    const cookie = await this.getCookie();
     const response = await this.api.get<{ name: string }[]>(
       `/eaa/console/${this.configs.accountId}/settings`,
       {
-        headers: {
-          Cookie: cookie,
-        },
+        headers: { Cookie: await this.getCookie() },
       }
     );
     return response.data[0];
+  }
+
+  async enableOrdering(enabled: boolean) {
+    await this.api.put(
+      `/eaa/console/${this.configs.accountId}/accounts`,
+      {
+        key: "is_enabled",
+        value: enabled,
+        dbTable: "accounts",
+        label: "啟用點餐",
+        type: "boolean",
+      },
+      { headers: { Cookie: await this.getCookie() } }
+    );
   }
 
   private extractCookie(cookies: Cookie[]): string | undefined {
