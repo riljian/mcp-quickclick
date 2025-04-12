@@ -22,17 +22,17 @@ jobs:
       - name: Push Docker image
         run: docker push ${{ secrets.REGISTRY_USERNAME }}/mcp-quickclick:${{ github.sha }}
 
-  # deploy:
-  #   needs: build-and-push
-  #   runs-on: ubuntu-latest
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
 
-  #   steps:
-  #     - name: Set up Kubeconfig
-  #       run: |
-  #         mkdir -p $HOME/.kube
-  #         echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
-  #         chmod 600 $HOME/.kube/config
+    steps:
+      - name: Set up Kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
 
-  #     - name: Set image in deployment and apply
-  #       run: |
-  #         kubectl set image deployment/mcp-quickclick mcp-quickclick=${{ secrets.REGISTRY_USERNAME }}/mcp-quickclick:${{ github.sha }}
+      - name: Set image in deployment and apply
+        run: |
+          kubectl set image deployment/mcp-quickclick mcp-quickclick=${{ secrets.REGISTRY_USERNAME }}/mcp-quickclick:${{ github.sha }}
