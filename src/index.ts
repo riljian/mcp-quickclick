@@ -126,6 +126,25 @@ server.tool(
 );
 
 server.tool(
+  "get-product",
+  "Get product, including its id, price, name, description, and isVisible",
+  {
+    id: z.number(),
+  },
+  async ({ id }) => {
+    const product = await quickClickConsole.getProduct(id);
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(product),
+        },
+      ],
+    };
+  }
+);
+
+server.tool(
   "update-product",
   "Update product",
   {
