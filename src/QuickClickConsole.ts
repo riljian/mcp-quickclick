@@ -157,6 +157,21 @@ export default class QuickClickConsole {
     });
   }
 
+  async updateToGoWaitingTime(waitingTime: number) {
+    await this.api.put(
+      `/console/apis/eaa/console/${this.configs.accountId}/business`,
+      {
+        dbTable: "business",
+        key: "to_go_waiting_time",
+        label: "Takeout Preparation Time",
+        type: "string",
+        value: waitingTime.toString(),
+        origin: waitingTime.toString(),
+      },
+      { headers: { Cookie: await this.getCookie() } }
+    );
+  }
+
   async enableOrdering(enabled: boolean) {
     await this.api.put(
       `/console/apis/eaa/console/${this.configs.accountId}/accounts`,

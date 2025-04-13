@@ -18,17 +18,40 @@ const quickClickConsole = new QuickClickConsole({
   menuId: config.menuId,
 });
 
-server.tool("get-settings", "Get platform settings", async () => {
-  const settings = await quickClickConsole.getSettings();
-  return {
-    content: [
-      {
-        type: "text",
-        text: JSON.stringify(settings),
-      },
-    ],
-  };
-});
+server.tool(
+  "get-settings",
+  "Get platform settings, including to-go waiting time (in minutes)",
+  async () => {
+    const settings = await quickClickConsole.getSettings();
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(settings),
+        },
+      ],
+    };
+  }
+);
+
+server.tool(
+  "update-to-go-waiting-time",
+  "Update to-go waiting time (in minutes)",
+  {
+    waitingTime: z.number(),
+  },
+  async ({ waitingTime }) => {
+    await quickClickConsole.updateToGoWaitingTime(waitingTime);
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Updated to-go waiting time to ${waitingTime}`,
+        },
+      ],
+    };
+  }
+);
 
 server.tool(
   "list-day-offs",
