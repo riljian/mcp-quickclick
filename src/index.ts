@@ -15,6 +15,7 @@ const quickClickConsole = new QuickClickConsole({
   username: config.username,
   password: config.password,
   accountId: config.accountId,
+  menuId: config.menuId,
 });
 
 server.tool("get-settings", "取得快一點平台上的設定", async () => {
@@ -95,6 +96,25 @@ server.tool(
         {
           type: "text",
           text: `Ordering ${enabled ? "enabled" : "disabled"}`,
+        },
+      ],
+    };
+  }
+);
+
+server.tool(
+  "list-products",
+  "列出快一點平台上的餐點",
+  {
+    name: z.string().optional(),
+  },
+  async ({ name }) => {
+    const products = await quickClickConsole.listProducts({ name });
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(products),
         },
       ],
     };

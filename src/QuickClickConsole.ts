@@ -8,7 +8,7 @@ type Cookie = { Expires: string } & Record<string, string | undefined>;
 export default class QuickClickConsole {
   private cookies: Cookie[] = [];
   private api = axios.create({
-    baseURL: "https://app.quickclick.cc/console/apis",
+    baseURL: "https://app.quickclick.cc",
   });
 
   constructor(
@@ -16,12 +16,13 @@ export default class QuickClickConsole {
       username: string;
       password: string;
       accountId: number;
+      menuId: number;
     }
   ) {}
 
   async getSettings() {
     const response = await this.api.get<{ name: string }[]>(
-      `/eaa/console/${this.configs.accountId}/settings`,
+      `/console/apis/eaa/console/${this.configs.accountId}/settings`,
       {
         headers: { Cookie: await this.getCookie() },
       }
@@ -31,7 +32,7 @@ export default class QuickClickConsole {
 
   async addDayOff(date: string) {
     await this.api.post(
-      `/eaa/shops/${this.configs.accountId}/opening-special`,
+      `/console/apis/eaa/shops/${this.configs.accountId}/opening-special`,
       { date, closeDay: 100 },
       { headers: { Cookie: await this.getCookie() } }
     );
@@ -39,14 +40,14 @@ export default class QuickClickConsole {
 
   async deleteDayOff(id: number) {
     await this.api.delete(
-      `/eaa/shops/${this.configs.accountId}/opening-special/${id}`,
+      `/console/apis/eaa/shops/${this.configs.accountId}/opening-special/${id}`,
       { headers: { Cookie: await this.getCookie() } }
     );
   }
 
   async listDayOffs() {
     const response = await this.api.get<{ name: string }[]>(
-      `/eaa/shops/${this.configs.accountId}/opening-special`,
+      `/console/apis/eaa/shops/${this.configs.accountId}/opening-special`,
       {
         headers: { Cookie: await this.getCookie() },
       }
@@ -54,9 +55,31 @@ export default class QuickClickConsole {
     return response.data;
   }
 
+  async listProducts(filter?: {
+    name?: string;
+  }): Promise<{ id: number; price: number; name: string }[]> {
+    const response = await this.api.get<
+      { id: number; amount: number; name: string }[]
+    >(`/admin/web-apis/menus/${this.configs.menuId}/products`, {
+      headers: { Cookie: await this.getCookie() },
+    });
+    const filteredProducts = response.data.filter((product) => {
+      if (filter?.name) {
+        return product.name.includes(filter.name);
+      }
+      return true;
+    });
+    const normalizedProducts = filteredProducts.map((product) => ({
+      id: product.id,
+      price: product.amount,
+      name: product.name,
+    }));
+    return normalizedProducts;
+  }
+
   async enableOrdering(enabled: boolean) {
     await this.api.put(
-      `/eaa/console/${this.configs.accountId}/accounts`,
+      `/console/apis/eaa/console/${this.configs.accountId}/accounts`,
       {
         key: "is_enabled",
         value: enabled,
@@ -92,7 +115,7 @@ export default class QuickClickConsole {
       return cookie;
     }
 
-    const response = await this.api.post("/eaa/signin", {
+    const response = await this.api.post("/console/apis/eaa/signin", {
       type: "eaa",
       username: this.configs.username,
       password: this.configs.password,
