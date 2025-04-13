@@ -30,17 +30,21 @@ server.tool("get-settings", "取得快一點平台上的設定", async () => {
   };
 });
 
-server.tool("list-day-offs", "列出快一點平台上的額外休息時間", async () => {
-  const dayOffs = await quickClickConsole.listDayOffs();
-  return {
-    content: [
-      {
-        type: "text",
-        text: JSON.stringify(dayOffs),
-      },
-    ],
-  };
-});
+server.tool(
+  "list-day-offs",
+  "列出快一點平台上的額外休息時間，並取得其 id",
+  async () => {
+    const dayOffs = await quickClickConsole.listDayOffs();
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(dayOffs),
+        },
+      ],
+    };
+  }
+);
 
 server.tool(
   "add-day-off",
@@ -104,7 +108,7 @@ server.tool(
 
 server.tool(
   "list-products",
-  "列出快一點平台上的餐點",
+  "列出快一點平台上的餐點，並取得其 id、價格、名稱",
   {
     name: z.string().optional(),
   },
