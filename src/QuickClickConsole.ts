@@ -84,10 +84,39 @@ export default class QuickClickConsole {
       name: string;
       description: string;
       isVisibled: 0 | 1;
+      categoryId: number;
+      categoryName: string;
     }>(`/admin/web-apis/products/${id}`, {
       headers: { Cookie: await this.getCookie() },
     });
     return response.data;
+  }
+
+  async createProduct(product: {
+    price: number;
+    name: string;
+    description?: string;
+    isVisible: boolean;
+    categoryId: number;
+  }) {
+    await this.api.post(
+      `/admin/web-apis/menus/${this.configs.menuId}/products`,
+      {
+        amount: product.price,
+        name: product.name,
+        description: product.description ?? "",
+        isVisibled: product.isVisible ? 1 : 0,
+        calories: null,
+        categoryId: product.categoryId,
+        code: "",
+        image: "",
+        stock: null,
+        stockReset: null,
+        tempFile: null,
+        variations: {},
+      },
+      { headers: { Cookie: await this.getCookie() } }
+    );
   }
 
   async updateProduct(product: {

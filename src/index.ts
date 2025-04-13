@@ -127,7 +127,7 @@ server.tool(
 
 server.tool(
   "get-product",
-  "Get product, including its id, price, name, description, and isVisible",
+  "Get product, including its id, price, name, description, categoryId, and isVisible",
   {
     id: z.number(),
   },
@@ -138,6 +138,35 @@ server.tool(
         {
           type: "text",
           text: JSON.stringify(product),
+        },
+      ],
+    };
+  }
+);
+
+server.tool(
+  "create-product",
+  "Create product",
+  {
+    price: z.number(),
+    name: z.string(),
+    description: z.string().optional(),
+    isVisible: z.boolean(),
+    categoryId: z.number(),
+  },
+  async ({ price, name, description, isVisible, categoryId }) => {
+    await quickClickConsole.createProduct({
+      price,
+      name,
+      description,
+      isVisible,
+      categoryId,
+    });
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Created product ${name}`,
         },
       ],
     };
