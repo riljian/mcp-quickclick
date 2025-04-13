@@ -18,7 +18,7 @@ const quickClickConsole = new QuickClickConsole({
   menuId: config.menuId,
 });
 
-server.tool("get-settings", "取得快一點平台上的設定", async () => {
+server.tool("get-settings", "Get platform settings", async () => {
   const settings = await quickClickConsole.getSettings();
   return {
     content: [
@@ -32,7 +32,7 @@ server.tool("get-settings", "取得快一點平台上的設定", async () => {
 
 server.tool(
   "list-day-offs",
-  "列出快一點平台上的額外休息時間，並取得其 id",
+  "List extra day offs and get their ids",
   async () => {
     const dayOffs = await quickClickConsole.listDayOffs();
     return {
@@ -48,7 +48,7 @@ server.tool(
 
 server.tool(
   "add-day-off",
-  "新增快一點平台上的額外休息時間",
+  "Add extra day off",
   {
     date: z
       .string()
@@ -70,7 +70,7 @@ server.tool(
 
 server.tool(
   "delete-day-off",
-  "刪除快一點平台上的額外休息時間",
+  "Delete extra day off",
   {
     id: z.number(),
   },
@@ -89,7 +89,7 @@ server.tool(
 
 server.tool(
   "enable-ordering",
-  "啟用快一點平台上的點餐功能",
+  "Enable ordering",
   {
     enabled: z.boolean(),
   },
@@ -108,7 +108,7 @@ server.tool(
 
 server.tool(
   "list-products",
-  "列出快一點平台上的餐點，並取得其 id、價格、名稱",
+  "List products and get their ids, prices, and names",
   {
     name: z.string().optional(),
   },
@@ -127,7 +127,7 @@ server.tool(
 
 server.tool(
   "update-product",
-  "更新快一點平台上的餐點",
+  "Update product",
   {
     id: z.number(),
     price: z.number().optional(),
