@@ -44,4 +44,19 @@ describe("QuickClickConsole", () => {
       name: expect.any(String),
     });
   });
+
+  it("should update product", async () => {
+    const console = new QuickClickConsole({
+      username: config.username,
+      password: config.password,
+      accountId: config.accountId,
+      menuId: config.menuId,
+    });
+    await expect(
+      console.updateProduct({
+        id: 20064781,
+        isVisible: true,
+      })
+    ).resolves.not.toThrow();
+  });
 });

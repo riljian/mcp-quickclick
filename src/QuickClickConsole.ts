@@ -83,7 +83,7 @@ export default class QuickClickConsole {
       amount: number;
       name: string;
       description: string;
-      isVisible: 0 | 1;
+      isVisibled: 0 | 1;
     }>(`/admin/web-apis/products/${id}`, {
       headers: { Cookie: await this.getCookie() },
     });
@@ -100,7 +100,7 @@ export default class QuickClickConsole {
     const originalProduct = await this.getProduct(product.id);
     const newProduct = merge(
       pick(originalProduct, [
-        "categories",
+        "calories",
         "categoryId",
         "code",
         "image",
@@ -111,7 +111,7 @@ export default class QuickClickConsole {
         amount: product.price ?? originalProduct.amount,
         name: product.name ?? originalProduct.name,
         description: product.description ?? originalProduct.description,
-        isVisible: originalProduct.isVisible,
+        isVisibled: originalProduct.isVisibled,
         tempFile: null,
         variations: {
           ubereats: {},
@@ -120,8 +120,9 @@ export default class QuickClickConsole {
       }
     );
     if (product.isVisible !== undefined) {
-      newProduct.isVisible = product.isVisible ? 1 : 0;
+      newProduct.isVisibled = product.isVisible ? 1 : 0;
     }
+    console.log("Updating product", JSON.stringify(newProduct));
     await this.api.put(`/admin/web-apis/products/${product.id}`, newProduct, {
       headers: { Cookie: await this.getCookie() },
     });
