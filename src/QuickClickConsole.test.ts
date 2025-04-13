@@ -25,6 +25,7 @@ describe("QuickClickConsole", () => {
       username: config.username,
       password: config.password,
       accountId: config.accountId,
+      menuId: config.menuId,
     });
     await console.getSettings();
     await console.getSettings();
@@ -36,6 +37,7 @@ describe("QuickClickConsole", () => {
       username: config.username,
       password: config.password,
       accountId: config.accountId,
+      menuId: config.menuId,
     });
     const settings = await console.getSettings();
     expect(settings).toMatchObject({
