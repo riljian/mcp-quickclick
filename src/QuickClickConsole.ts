@@ -1,5 +1,6 @@
 import axios from "axios";
 import { parse } from "cookie";
+import { pick, merge } from "lodash";
 
 const COOKIE_NAME = "connect.sid";
 
@@ -75,6 +76,55 @@ export default class QuickClickConsole {
       name: product.name,
     }));
     return normalizedProducts;
+  }
+
+  async getProduct(id: number) {
+    const response = await this.api.get<{
+      amount: number;
+      name: string;
+      description: string;
+      isVisible: 0 | 1;
+    }>(`/admin/web-apis/products/${id}`, {
+      headers: { Cookie: await this.getCookie() },
+    });
+    return response.data;
+  }
+
+  async updateProduct(product: {
+    id: number;
+    price?: number;
+    name?: string;
+    description?: string;
+    isVisible?: boolean;
+  }) {
+    const originalProduct = await this.getProduct(product.id);
+    const newProduct = merge(
+      pick(originalProduct, [
+        "categories",
+        "categoryId",
+        "code",
+        "image",
+        "stock",
+        "stockReset",
+      ]),
+      {
+        amount: product.price ?? originalProduct.amount,
+        name: product.name ?? originalProduct.name,
+        description: product.description ?? originalProduct.description,
+        isVisible: originalProduct.isVisible,
+        tempFile: null,
+        variations: {
+          ubereats: {},
+          foodpanda: {},
+        },
+      }
+    );
+    if (product.isVisible !== undefined) {
+      newProduct.isVisible = product.isVisible ? 1 : 0;
+    }
+    await this.api.put(`/admin/web-apis/products/${product.id}`, newProduct, {
+      headers: { Cookie: await this.getCookie() },
+    });
   }
 
   async enableOrdering(enabled: boolean) {

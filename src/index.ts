@@ -125,6 +125,36 @@ server.tool(
   }
 );
 
+server.tool(
+  "update-product",
+  "更新快一點平台上的餐點",
+  {
+    id: z.number(),
+    price: z.number().optional(),
+    name: z.string().optional(),
+    description: z.string().optional(),
+    isVisible: z.boolean().optional(),
+  },
+  async ({ id, price, name, description, isVisible }) => {
+    await quickClickConsole.updateProduct({
+      id,
+      price,
+      name,
+      description,
+      isVisible,
+    });
+    const updatedProduct = await quickClickConsole.getProduct(id);
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Updated product ${id} with ${JSON.stringify(updatedProduct)}`,
+        },
+      ],
+    };
+  }
+);
+
 // to support multiple simultaneous connections we have a lookup object from
 // sessionId to transport
 const transports: { [sessionId: string]: SSEServerTransport } = {};
