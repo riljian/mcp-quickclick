@@ -6,11 +6,20 @@ const COOKIE_NAME = "connect.sid";
 
 type Cookie = { Expires: string } & Record<string, string | undefined>;
 
+const PRODUCT_CACHE_EXPIRATION = 1000 * 60 * 10; // 10 minutes
+
 export default class QuickClickConsole {
   private cookies: Cookie[] = [];
   private api = axios.create({
     baseURL: "https://app.quickclick.cc",
   });
+  private productVisibleCache: Map<
+    number,
+    {
+      isVisible: boolean;
+      syncAt: number;
+    }
+  > = new Map();
 
   constructor(
     private readonly configs: {
@@ -58,7 +67,9 @@ export default class QuickClickConsole {
 
   async listProducts(filter?: {
     name?: string;
-  }): Promise<{ id: number; price: number; name: string }[]> {
+  }): Promise<
+    { id: number; price: number; name: string; isVisible: boolean }[]
+  > {
     const response = await this.api.get<
       { id: number; amount: number; name: string }[]
     >(`/admin/web-apis/menus/${this.configs.menuId}/products`, {
@@ -70,12 +81,31 @@ export default class QuickClickConsole {
       }
       return true;
     });
-    const normalizedProducts = filteredProducts.map((product) => ({
-      id: product.id,
-      price: product.amount,
-      name: product.name,
-    }));
-    return normalizedProducts;
+    const now = Date.now();
+    return Promise.all(
+      filteredProducts.map(async (product) => {
+        const visibleCache = this.productVisibleCache.get(product.id);
+        if (
+          visibleCache &&
+          visibleCache.syncAt > now - PRODUCT_CACHE_EXPIRATION
+        ) {
+          return {
+            id: product.id,
+            price: product.amount,
+            name: product.name,
+            isVisible: visibleCache.isVisible,
+          };
+        }
+
+        const updatedProduct = await this.getProduct(product.id);
+        return {
+          id: product.id,
+          price: updatedProduct.amount,
+          name: updatedProduct.name,
+          isVisible: updatedProduct.isVisible,
+        };
+      })
+    );
   }
 
   async getProduct(id: number) {
@@ -89,7 +119,18 @@ export default class QuickClickConsole {
     }>(`/admin/web-apis/products/${id}`, {
       headers: { Cookie: await this.getCookie() },
     });
-    return response.data;
+    const { isVisibled, ...rest } = response.data;
+    const product = {
+      ...rest,
+      isVisible: isVisibled === 1,
+    };
+
+    this.productVisibleCache.set(id, {
+      isVisible: product.isVisible,
+      syncAt: Date.now(),
+    });
+
+    return product;
   }
 
   async createProduct(product: {
@@ -140,7 +181,7 @@ export default class QuickClickConsole {
         amount: product.price ?? originalProduct.amount,
         name: product.name ?? originalProduct.name,
         description: product.description ?? originalProduct.description,
-        isVisibled: originalProduct.isVisibled,
+        isVisibled: originalProduct.isVisible ? 1 : 0,
         tempFile: null,
         variations: {
           ubereats: {},

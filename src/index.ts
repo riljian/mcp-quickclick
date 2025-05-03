@@ -131,7 +131,7 @@ server.tool(
 
 server.tool(
   "list-products",
-  "List products and get their ids, prices, and names",
+  "List products and get their id, price, name, and isVisible",
   {
     name: z.string().optional(),
   },
