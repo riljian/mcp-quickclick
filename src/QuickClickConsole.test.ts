@@ -55,7 +55,7 @@ describe("QuickClickConsole", () => {
     await expect(
       console.updateProduct({
         id: 20064781,
-        isVisible: true,
+        isAvailable: true,
       })
     ).resolves.not.toThrow();
   });

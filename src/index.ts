@@ -131,7 +131,7 @@ server.tool(
 
 server.tool(
   "list-products",
-  "List products and get their id, price, name, and isVisible",
+  "List products and get their id, price, name, and isAvailable",
   {
     name: z.string().optional(),
   },
@@ -150,7 +150,7 @@ server.tool(
 
 server.tool(
   "get-product",
-  "Get product, including its id, price, name, description, categoryId, and isVisible",
+  "Get product, including its id, price, name, description, categoryId, and isAvailable",
   {
     id: z.number(),
   },
@@ -174,15 +174,15 @@ server.tool(
     price: z.number(),
     name: z.string(),
     description: z.string().optional(),
-    isVisible: z.boolean(),
+    isAvailable: z.boolean(),
     categoryId: z.number(),
   },
-  async ({ price, name, description, isVisible, categoryId }) => {
+  async ({ price, name, description, isAvailable, categoryId }) => {
     await quickClickConsole.createProduct({
       price,
       name,
       description,
-      isVisible,
+      isAvailable,
       categoryId,
     });
     return {
@@ -204,15 +204,15 @@ server.tool(
     price: z.number().optional(),
     name: z.string().optional(),
     description: z.string().optional(),
-    isVisible: z.boolean().optional(),
+    isAvailable: z.boolean().optional(),
   },
-  async ({ id, price, name, description, isVisible }) => {
+  async ({ id, price, name, description, isAvailable }) => {
     await quickClickConsole.updateProduct({
       id,
       price,
       name,
       description,
-      isVisible,
+      isAvailable,
     });
     const updatedProduct = await quickClickConsole.getProduct(id);
     return {

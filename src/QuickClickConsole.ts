@@ -13,10 +13,10 @@ export default class QuickClickConsole {
   private api = axios.create({
     baseURL: "https://app.quickclick.cc",
   });
-  private productVisibleCache: Map<
+  private productAvailableCache: Map<
     number,
     {
-      isVisible: boolean;
+      isAvailable: boolean;
       syncAt: number;
     }
   > = new Map();
@@ -68,7 +68,7 @@ export default class QuickClickConsole {
   async listProducts(filter?: {
     name?: string;
   }): Promise<
-    { id: number; price: number; name: string; isVisible: boolean }[]
+    { id: number; price: number; name: string; isAvailable: boolean }[]
   > {
     const response = await this.api.get<
       { id: number; amount: number; name: string }[]
@@ -84,16 +84,16 @@ export default class QuickClickConsole {
     const now = Date.now();
     return Promise.all(
       filteredProducts.map(async (product) => {
-        const visibleCache = this.productVisibleCache.get(product.id);
+        const availableCache = this.productAvailableCache.get(product.id);
         if (
-          visibleCache &&
-          visibleCache.syncAt > now - PRODUCT_CACHE_EXPIRATION
+          availableCache &&
+          availableCache.syncAt > now - PRODUCT_CACHE_EXPIRATION
         ) {
           return {
             id: product.id,
             price: product.amount,
             name: product.name,
-            isVisible: visibleCache.isVisible,
+            isAvailable: availableCache.isAvailable,
           };
         }
 
@@ -102,7 +102,7 @@ export default class QuickClickConsole {
           id: product.id,
           price: updatedProduct.amount,
           name: updatedProduct.name,
-          isVisible: updatedProduct.isVisible,
+          isAvailable: updatedProduct.isAvailable,
         };
       })
     );
@@ -122,11 +122,11 @@ export default class QuickClickConsole {
     const { isVisibled, ...rest } = response.data;
     const product = {
       ...rest,
-      isVisible: isVisibled === 1,
+      isAvailable: isVisibled === 1,
     };
 
-    this.productVisibleCache.set(id, {
-      isVisible: product.isVisible,
+    this.productAvailableCache.set(id, {
+      isAvailable: product.isAvailable,
       syncAt: Date.now(),
     });
 
@@ -137,7 +137,7 @@ export default class QuickClickConsole {
     price: number;
     name: string;
     description?: string;
-    isVisible: boolean;
+    isAvailable: boolean;
     categoryId: number;
   }) {
     await this.api.post(
@@ -146,7 +146,7 @@ export default class QuickClickConsole {
         amount: product.price,
         name: product.name,
         description: product.description ?? "",
-        isVisibled: product.isVisible ? 1 : 0,
+        isVisibled: product.isAvailable ? 1 : 0,
         calories: null,
         categoryId: product.categoryId,
         code: "",
@@ -165,7 +165,7 @@ export default class QuickClickConsole {
     price?: number;
     name?: string;
     description?: string;
-    isVisible?: boolean;
+    isAvailable?: boolean;
   }) {
     const originalProduct = await this.getProduct(product.id);
     const newProduct = merge(
@@ -181,7 +181,7 @@ export default class QuickClickConsole {
         amount: product.price ?? originalProduct.amount,
         name: product.name ?? originalProduct.name,
         description: product.description ?? originalProduct.description,
-        isVisibled: originalProduct.isVisible ? 1 : 0,
+        isVisibled: originalProduct.isAvailable ? 1 : 0,
         tempFile: null,
         variations: {
           ubereats: {},
@@ -189,8 +189,8 @@ export default class QuickClickConsole {
         },
       }
     );
-    if (product.isVisible !== undefined) {
-      newProduct.isVisibled = product.isVisible ? 1 : 0;
+    if (product.isAvailable !== undefined) {
+      newProduct.isVisibled = product.isAvailable ? 1 : 0;
     }
     console.log("Updating product", JSON.stringify(newProduct));
     await this.api.put(`/admin/web-apis/products/${product.id}`, newProduct, {
