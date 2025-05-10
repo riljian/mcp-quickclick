@@ -20,7 +20,10 @@ jobs:
         run: docker build -t ${{ secrets.REGISTRY_USERNAME }}/mcp-quickclick:${{ github.sha }} .
 
       - name: Push Docker image
-        run: docker push ${{ secrets.REGISTRY_USERNAME }}/mcp-quickclick:${{ github.sha }}
+        run: |
+          docker push ${{ secrets.REGISTRY_USERNAME }}/mcp-quickclick:${{ github.sha }}
+          docker tag ${{ secrets.REGISTRY_USERNAME }}/mcp-quickclick:${{ github.sha }} ${{ secrets.REGISTRY_USERNAME }}/mcp-quickclick:latest
+          docker push ${{ secrets.REGISTRY_USERNAME }}/mcp-quickclick:latest
 
   deploy:
     needs: build-and-push
