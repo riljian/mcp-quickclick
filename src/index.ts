@@ -1,12 +1,12 @@
 import express, { Request, Response } from "express";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { z } from "zod";
 
 import QuickClickConsole from "./QuickClickConsole";
 import config from "./config";
 
-const app = express();
 const server = new McpServer({
   name: "mcp-quickclick",
   version: "1.0.0",
@@ -18,164 +18,225 @@ const quickClickConsole = new QuickClickConsole({
   menuId: config.menuId,
 });
 
-server.tool(
+server.registerTool(
   "get-settings",
-  "Get platform settings, including to-go waiting time (in minutes)",
+  {
+    title: "Get platform settings",
+    inputSchema: undefined,
+    outputSchema: {
+      name: z.string().describe("The name of the shop"),
+      to_go_waiting_time: z
+        .string()
+        .describe("The to-go waiting time in minutes"),
+    },
+  },
   async () => {
     const settings = await quickClickConsole.getSettings();
     return {
-      content: [
-        {
-          type: "text",
-          text: JSON.stringify(settings),
-        },
-      ],
+      content: [{ type: "text", text: JSON.stringify(settings) }],
+      structuredContent: settings,
     };
   }
 );
 
-server.tool(
+server.registerTool(
   "update-to-go-waiting-time",
-  "Update to-go waiting time (in minutes)",
   {
-    waitingTime: z.number(),
+    title: "Update to-go waiting time (in minutes)",
+    inputSchema: {
+      waitingTime: z.number(),
+    },
+    outputSchema: {
+      message: z
+        .string()
+        .describe("The message indicating the success of the operation"),
+    },
   },
   async ({ waitingTime }) => {
     await quickClickConsole.updateToGoWaitingTime(waitingTime);
+    const result = {
+      message: `Updated to-go waiting time to ${waitingTime}`,
+    };
     return {
-      content: [
-        {
-          type: "text",
-          text: `Updated to-go waiting time to ${waitingTime}`,
-        },
-      ],
+      content: [{ type: "text", text: JSON.stringify(result) }],
+      structuredContent: result,
     };
   }
 );
 
-server.tool(
+server.registerTool(
   "list-day-offs",
-  "List extra day offs and get their ids",
+  {
+    title: "List extra day offs",
+    inputSchema: undefined,
+    outputSchema: {
+      dayOffs: z.array(
+        z.object({
+          id: z.number(),
+          specialDate: z
+            .string()
+            .describe("The date of the extra day off in YYYY-MM-DD format"),
+        })
+      ),
+    },
+  },
   async () => {
     const dayOffs = await quickClickConsole.listDayOffs();
+    const result = { dayOffs };
     return {
-      content: [
-        {
-          type: "text",
-          text: JSON.stringify(dayOffs),
-        },
-      ],
+      content: [{ type: "text", text: JSON.stringify(result) }],
+      structuredContent: result,
     };
   }
 );
 
-server.tool(
+server.registerTool(
   "add-day-off",
-  "Add extra day off",
   {
-    date: z
-      .string()
-      .regex(/^\d{4}-\d{2}-\d{2}$/)
-      .describe("The date to add the opening special for in YYYY-MM-DD format"),
+    title: "Add extra day off",
+    inputSchema: {
+      date: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/)
+        .describe(
+          "The date to add the opening special for in YYYY-MM-DD format"
+        ),
+    },
+    outputSchema: {
+      message: z
+        .string()
+        .describe("The message indicating the success of the operation"),
+    },
   },
   async ({ date }) => {
     await quickClickConsole.addDayOff(date);
+    const result = { message: `Added day off for ${date}` };
     return {
-      content: [
-        {
-          type: "text",
-          text: `Added day off for ${date}`,
-        },
-      ],
+      content: [{ type: "text", text: JSON.stringify(result) }],
+      structuredContent: result,
     };
   }
 );
 
-server.tool(
+server.registerTool(
   "delete-day-off",
-  "Delete extra day off",
   {
-    id: z.number(),
+    title: "Delete extra day off",
+    inputSchema: {
+      id: z.number(),
+    },
+    outputSchema: {
+      message: z
+        .string()
+        .describe("The message indicating the success of the operation"),
+    },
   },
   async ({ id }) => {
     await quickClickConsole.deleteDayOff(id);
+    const result = { message: `Deleted day off for ${id}` };
     return {
-      content: [
-        {
-          type: "text",
-          text: `Deleted day off for ${id}`,
-        },
-      ],
+      content: [{ type: "text", text: JSON.stringify(result) }],
+      structuredContent: result,
     };
   }
 );
 
-server.tool(
+server.registerTool(
   "enable-ordering",
-  "Enable ordering",
   {
-    enabled: z.boolean(),
+    title: "Enable ordering",
+    inputSchema: {
+      enabled: z.boolean().describe("Whether to enable ordering"),
+    },
+    outputSchema: {
+      message: z
+        .string()
+        .describe("The message indicating the success of the operation"),
+    },
   },
   async ({ enabled }) => {
     await quickClickConsole.enableOrdering(enabled);
+    const result = { message: `Ordering ${enabled ? "enabled" : "disabled"}` };
     return {
-      content: [
-        {
-          type: "text",
-          text: `Ordering ${enabled ? "enabled" : "disabled"}`,
-        },
-      ],
+      content: [{ type: "text", text: JSON.stringify(result) }],
+      structuredContent: result,
     };
   }
 );
 
-server.tool(
+server.registerTool(
   "list-products",
-  "List products and get their id, price, name, and isAvailable",
   {
-    name: z.string().optional(),
+    title: "List products",
+    inputSchema: {
+      name: z
+        .string()
+        .optional()
+        .describe("The name of the product to filter by"),
+    },
+    outputSchema: {
+      products: z.array(
+        z.object({
+          id: z.number(),
+          price: z.number().describe("The price of the product"),
+          name: z.string().describe("The name of the product"),
+          isAvailable: z.boolean().describe("Whether the product is available"),
+        })
+      ),
+    },
   },
   async ({ name }) => {
     const products = await quickClickConsole.listProducts({ name });
+    const result = { products };
     return {
-      content: [
-        {
-          type: "text",
-          text: JSON.stringify(products),
-        },
-      ],
+      content: [{ type: "text", text: JSON.stringify(result) }],
+      structuredContent: result,
     };
   }
 );
 
-server.tool(
+server.registerTool(
   "get-product",
-  "Get product, including its id, price, name, description, categoryId, and isAvailable",
   {
-    id: z.number(),
+    title: "Get product",
+    inputSchema: {
+      id: z.number().describe("The id of the product to get"),
+    },
+    outputSchema: {
+      name: z.string().describe("The name of the product"),
+      description: z.string().describe("The description of the product"),
+      categoryId: z.number().describe("The category id of the product"),
+      isAvailable: z.boolean().describe("Whether the product is available"),
+    },
   },
   async ({ id }) => {
     const product = await quickClickConsole.getProduct(id);
     return {
-      content: [
-        {
-          type: "text",
-          text: JSON.stringify(product),
-        },
-      ],
+      content: [{ type: "text", text: JSON.stringify(product) }],
+      structuredContent: product,
     };
   }
 );
 
-server.tool(
+server.registerTool(
   "create-product",
-  "Create product",
   {
-    price: z.number(),
-    name: z.string(),
-    description: z.string().optional(),
-    isAvailable: z.boolean(),
-    categoryId: z.number(),
+    title: "Create product",
+    inputSchema: {
+      price: z.number().describe("The price of the product"),
+      name: z.string().describe("The name of the product"),
+      description: z
+        .string()
+        .optional()
+        .describe("The description of the product"),
+      isAvailable: z.boolean().describe("Whether the product is available"),
+      categoryId: z.number().describe("The category id of the product"),
+    },
+    outputSchema: {
+      message: z
+        .string()
+        .describe("The message indicating the success of the operation"),
+    },
   },
   async ({ price, name, description, isAvailable, categoryId }) => {
     await quickClickConsole.createProduct({
@@ -185,46 +246,56 @@ server.tool(
       isAvailable,
       categoryId,
     });
+    const result = { message: `Created product ${name}` };
     return {
-      content: [
-        {
-          type: "text",
-          text: `Created product ${name}`,
-        },
-      ],
+      content: [{ type: "text", text: JSON.stringify(result) }],
+      structuredContent: result,
     };
   }
 );
 
-server.tool(
+server.registerTool(
   "update-product",
-  "Update product",
   {
-    id: z.number(),
-    price: z.number().optional(),
-    name: z.string().optional(),
-    description: z.string().optional(),
-    isAvailable: z.boolean().optional(),
+    title: "Update product",
+    inputSchema: {
+      id: z.number().describe("The id of the product to update"),
+      price: z.number().optional().describe("The price of the product"),
+      name: z.string().optional().describe("The name of the product"),
+      description: z
+        .string()
+        .optional()
+        .describe("The description of the product"),
+      isAvailable: z
+        .boolean()
+        .optional()
+        .describe("Whether the product is available"),
+    },
+    outputSchema: {
+      message: z
+        .string()
+        .describe("The message indicating the success of the operation"),
+    },
   },
   async ({ id, price, name, description, isAvailable }) => {
-    await quickClickConsole.updateProduct({
+    const updatedProduct = await quickClickConsole.updateProduct({
       id,
       price,
       name,
       description,
       isAvailable,
     });
-    const updatedProduct = await quickClickConsole.getProduct(id);
+    const result = {
+      message: `Updated product ${id} with ${JSON.stringify(updatedProduct)}`,
+    };
     return {
-      content: [
-        {
-          type: "text",
-          text: `Updated product ${id} with ${JSON.stringify(updatedProduct)}`,
-        },
-      ],
+      content: [{ type: "text", text: JSON.stringify(result) }],
+      structuredContent: result,
     };
   }
 );
+
+const app = express();
 
 // to support multiple simultaneous connections we have a lookup object from
 // sessionId to transport
@@ -247,6 +318,20 @@ app.post("/messages", async (req: Request, res: Response) => {
   } else {
     res.status(400).send("No transport found for sessionId");
   }
+});
+
+app.post("/mcp", express.json(), async (req, res) => {
+  const transport = new StreamableHTTPServerTransport({
+    sessionIdGenerator: undefined,
+    enableJsonResponse: true,
+  });
+
+  res.on("close", () => {
+    transport.close();
+  });
+
+  await server.connect(transport);
+  await transport.handleRequest(req, res, req.body);
 });
 
 app.listen(config.port, () => {
