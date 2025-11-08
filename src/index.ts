@@ -1,4 +1,5 @@
 import express, { Request, Response } from "express";
+import { pick } from "lodash";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
@@ -32,9 +33,10 @@ server.registerTool(
   },
   async () => {
     const settings = await quickClickConsole.getSettings();
+    const result = pick(settings, ["name", "to_go_waiting_time"]);
     return {
-      content: [{ type: "text", text: JSON.stringify(settings) }],
-      structuredContent: settings,
+      content: [{ type: "text", text: JSON.stringify(result) }],
+      structuredContent: result,
     };
   }
 );
@@ -82,7 +84,9 @@ server.registerTool(
   },
   async () => {
     const dayOffs = await quickClickConsole.listDayOffs();
-    const result = { dayOffs };
+    const result = {
+      dayOffs: dayOffs.map((dayOff) => pick(dayOff, ["id", "specialDate"])),
+    };
     return {
       content: [{ type: "text", text: JSON.stringify(result) }],
       structuredContent: result,
@@ -187,7 +191,11 @@ server.registerTool(
   },
   async ({ name }) => {
     const products = await quickClickConsole.listProducts({ name });
-    const result = { products };
+    const result = {
+      products: products.map((product) =>
+        pick(product, ["id", "price", "name", "isAvailable"])
+      ),
+    };
     return {
       content: [{ type: "text", text: JSON.stringify(result) }],
       structuredContent: result,
@@ -211,9 +219,15 @@ server.registerTool(
   },
   async ({ id }) => {
     const product = await quickClickConsole.getProduct(id);
+    const result = pick(product, [
+      "name",
+      "description",
+      "categoryId",
+      "isAvailable",
+    ]);
     return {
-      content: [{ type: "text", text: JSON.stringify(product) }],
-      structuredContent: product,
+      content: [{ type: "text", text: JSON.stringify(result) }],
+      structuredContent: result,
     };
   }
 );
