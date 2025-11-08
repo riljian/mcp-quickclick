@@ -22,7 +22,9 @@ const quickClickConsole = new QuickClickConsole({
 server.registerTool(
   "get-settings",
   {
-    title: "Get platform settings, including name and to-go waiting time",
+    title: "Get platform settings",
+    description:
+      "This tool is used to get the platform settings, including name and to-go waiting time (in minutes)",
     inputSchema: {},
     outputSchema: {
       name: z.string().describe("The name of the shop"),
@@ -44,7 +46,9 @@ server.registerTool(
 server.registerTool(
   "update-to-go-waiting-time",
   {
-    title: "Update to-go waiting time (in minutes)",
+    title: "Update to-go waiting time",
+    description:
+      "This tool is used to update the to-go waiting time (in minutes)",
     inputSchema: {
       waitingTime: z.number(),
     },
@@ -69,7 +73,9 @@ server.registerTool(
 server.registerTool(
   "list-day-offs",
   {
-    title: "List extra day offs, including id and date",
+    title: "List extra day offs",
+    description:
+      "This tool is used to list the extra day offs, including id and date",
     inputSchema: {},
     outputSchema: {
       dayOffs: z.array(
@@ -98,6 +104,7 @@ server.registerTool(
   "add-day-off",
   {
     title: "Add extra day off",
+    description: "This tool is used to add an extra day off",
     inputSchema: {
       date: z
         .string()
@@ -126,6 +133,7 @@ server.registerTool(
   "delete-day-off",
   {
     title: "Delete extra day off",
+    description: "This tool is used to delete an extra day off",
     inputSchema: {
       id: z.number(),
     },
@@ -149,6 +157,7 @@ server.registerTool(
   "enable-ordering",
   {
     title: "Enable ordering",
+    description: "This tool is used to enable or disable ordering",
     inputSchema: {
       enabled: z.boolean().describe("Whether to enable ordering"),
     },
@@ -172,6 +181,8 @@ server.registerTool(
   "list-products",
   {
     title: "List products",
+    description:
+      "This tool is used to list the products, including id, price, name and isAvailable",
     inputSchema: {
       name: z
         .string()
@@ -207,6 +218,8 @@ server.registerTool(
   "get-product",
   {
     title: "Get product",
+    description:
+      "This tool is used to get a product, including name, description, categoryId and isAvailable",
     inputSchema: {
       id: z.number().describe("The id of the product to get"),
     },
@@ -236,6 +249,7 @@ server.registerTool(
   "create-product",
   {
     title: "Create product",
+    description: "This tool is used to create a product",
     inputSchema: {
       price: z.number().describe("The price of the product"),
       name: z.string().describe("The name of the product"),
@@ -272,6 +286,7 @@ server.registerTool(
   "update-product",
   {
     title: "Update product",
+    description: "This tool is used to update a product",
     inputSchema: {
       id: z.number().describe("The id of the product to update"),
       price: z.number().optional().describe("The price of the product"),
