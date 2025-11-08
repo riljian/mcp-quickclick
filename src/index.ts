@@ -22,7 +22,7 @@ const quickClickConsole = new QuickClickConsole({
 server.registerTool(
   "get-settings",
   {
-    title: "Get platform settings",
+    title: "Get platform settings, including name and to-go waiting time",
     inputSchema: {},
     outputSchema: {
       name: z.string().describe("The name of the shop"),
@@ -69,7 +69,7 @@ server.registerTool(
 server.registerTool(
   "list-day-offs",
   {
-    title: "List extra day offs",
+    title: "List extra day offs, including id and date",
     inputSchema: {},
     outputSchema: {
       dayOffs: z.array(
