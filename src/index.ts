@@ -22,7 +22,7 @@ server.registerTool(
   "get-settings",
   {
     title: "Get platform settings",
-    inputSchema: undefined,
+    inputSchema: {},
     outputSchema: {
       name: z.string().describe("The name of the shop"),
       to_go_waiting_time: z
@@ -68,7 +68,7 @@ server.registerTool(
   "list-day-offs",
   {
     title: "List extra day offs",
-    inputSchema: undefined,
+    inputSchema: {},
     outputSchema: {
       dayOffs: z.array(
         z.object({
